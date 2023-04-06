@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import requests
 
 
@@ -18,11 +18,6 @@ def about():
     return render_template('about.html')
 
 
-@app.route('/contact')
-def contact():
-    return render_template('contact.html')
-
-
 @app.route('/post/<post_id>')
 def post(post_id):
     for post_data in api_data_json:
@@ -37,6 +32,28 @@ def post(post_id):
             }
     return render_template("post.html", post_dict=post_dict, blog_id=id)
 
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        data = request.form
+        message_data = {
+            'name': data['name'],
+            'email': data['email'],
+            'phone': data['phone'],
+            'message': data['message']
+        }
+        return render_template('contact.html', message_data=message_data)
+    else:
+        return render_template('contact.html')
+
+
+"""
+@app.route('/form-entry', methods=['POST'])
+def receive_data():
+    data = request.form
+    return f"<h1>Successfully sent message.</h1><p>{data['name']}</p><p>{data['email']}</p><p>{data['phone']}</p><p>{data['message']}</p>"
+"""
 
 if __name__ == '__main__':
     app.run(debug=True)
