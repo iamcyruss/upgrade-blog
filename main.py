@@ -1,11 +1,15 @@
 from flask import Flask, render_template, request
 import requests
+import os
+import smtplib
 
 
 app = Flask(__name__)
 api_endpoint = "https://api.npoint.io/6e789129e8b4d33e00c4"
 api_response = requests.get(api_endpoint)
 api_data_json = api_response.json()
+GMAIL_PW = os.environ['GMAIL_PW']
+MY_EMAIL = "russnicosia.auto@gmail.com"
 
 
 @app.route('/')
@@ -43,6 +47,19 @@ def contact():
             'phone': data['phone'],
             'message': data['message']
         }
+        with smtplib.SMTP("smtp.gmail.com", 587) as gmail_connection:
+            gmail_connection.starttls()
+            gmail_connection.login(user=MY_EMAIL, password=GMAIL_PW)
+            gmail_connection.sendmail(
+                from_addr=MY_EMAIL,
+                to_addrs='russnicosia@gmail.com',
+                msg=f"Subject: Message From Website\n\n"
+                      f"From: {data['name']}\n"
+                      f"Email: {data['email']}\n"
+                      f"Phone: {data['phone']}\n"
+                      f"Message: {data['message']}\n\n"
+                      f"- Automated Russ"
+            )
         return render_template('contact.html', message_data=message_data)
     else:
         return render_template('contact.html')
